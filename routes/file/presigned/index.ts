@@ -77,7 +77,7 @@ const s3 = new AWS.S3({
 export default async (fastify: FastifyInstance, opts: unknown) => {
 	fastify.post<{
 		Body: {
-			expireIn: '1_hour' | '1_day' | '3_days' | '7_days' | 'Never';
+			expireIn: '1_hour' | '1_day' | '3_days' | '7_days' | '30_days';
 			filename: string;
 		};
 	}>('/', async (request, reply) => {
@@ -94,7 +94,7 @@ export default async (fastify: FastifyInstance, opts: unknown) => {
 		} else if (expireInStr === '7_days' || !expireInStr) {
 			expire = addDays(currentDate, 7);
 		} else {
-			expire = new Date('9999-12-31 23:59:59.999999');
+			expire = addDays(currentDate, 30);
 		}
 
 		const id = generateId(
