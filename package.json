@@ -1,54 +1,57 @@
 {
-	"name": "hiberapi",
-	"version": "1.0.0",
-	"description": "An API for HiberFile.",
-	"main": "app.js",
-	"directories": {
-		"test": "test"
-	},
-	"scripts": {
-		"test": "tap test/**/*.test.js",
-		"start": "tsc && fastify start -l info dist/app.js",
-		"dev": "nodemon --watch '**/*.ts' --exec 'fastify start -l info dist/app.js'",
-		"lint": "eslint .",
-		"lint:fix": "eslint . --fix"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/arthur-fontaine/hiberapi.git"
-	},
-	"author": "Arthur Fontaine",
-	"license": "GPL-3.0",
-	"bugs": {
-		"url": "https://github.com/arthur-fontaine/hiberapi/issues"
-	},
-	"homepage": "https://github.com/arthur-fontaine/hiberapi#readme",
-	"dependencies": {
-		"@types/busboy": "^0.2.3",
-		"@types/node": "^14.14.31",
-		"@types/pump": "^1.1.1",
-		"aws-sdk": "^2.850.0",
-		"dotenv": "^8.2.0",
-		"fastify": "^3.0.0",
-		"fastify-autoload": "^3.3.1",
-		"fastify-cli": "^2.8.0",
-		"fastify-cors": "^5.2.0",
-		"fastify-multer": "^2.0.2",
-		"fastify-multipart": "^4.0.0",
-		"fastify-plugin": "^3.0.0",
-		"fastify-sensible": "^3.1.0",
-		"file-chunked": "^1.0.4",
-		"mariadb": "^2.5.3",
-		"pump": "^3.0.0"
-	},
-	"devDependencies": {
-		"@typescript-eslint/eslint-plugin": "^4.15.2",
-		"@typescript-eslint/parser": "^4.15.2",
-		"eslint": "^7.20.0",
-		"eslint-config-prettier": "^8.1.0",
-		"eslint-plugin-prettier": "^3.3.1",
-		"prettier": "^2.2.1",
-		"tap": "^14.11.0",
-		"typescript": "^4.2.2"
-	}
+  "name": "hiberapi",
+  "version": "1.0.0",
+  "description": "An API for HiberFile.",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "tap test/**/*.test.js",
+    "start": "npm run prisma && npm run build:ts && fastify start -l info dist/app.js",
+    "dev": "nodemon --watch '**/*.ts' --exec 'fastify start -l info dist/app.js'",
+    "build:ts": "tsc",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prisma": "npx prisma migrate dev --name init"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arthur-fontaine/hiberapi.git"
+  },
+  "author": "Arthur Fontaine",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/arthur-fontaine/hiberapi/issues"
+  },
+  "homepage": "https://github.com/arthur-fontaine/hiberapi#readme",
+  "dependencies": {
+    "@prisma/client": "^2.27.0",
+    "@types/busboy": "^0.2.3",
+    "@types/node": "^14.14.31",
+    "@types/pump": "^1.1.1",
+    "aws-sdk": "^2.850.0",
+    "dotenv": "^8.2.0",
+    "fastify": "^3.0.0",
+    "fastify-autoload": "^3.8.0",
+    "fastify-cli": "^2.8.0",
+    "fastify-cors": "^6.0.2",
+    "fastify-plugin": "^3.0.0",
+    "fastify-sensible": "^3.1.0",
+    "file-chunked": "^1.0.4",
+    "mariadb": "^2.5.4",
+    "pump": "^3.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^4.15.2",
+    "@typescript-eslint/parser": "^4.15.2",
+    "eslint": "^7.20.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "fastify-tsconfig": "^1.0.1",
+    "prettier": "^2.2.1",
+    "prisma": "^2.27.0",
+    "tap": "^14.11.0",
+    "typescript": "4.1.3"
+  }
 }

@@ -1,0 +1,25 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model File {
+  id          Int      @id @default(autoincrement())
+  hiberfileId String   @unique
+  name        String
+  expire      DateTime
+  user        User?    @relation(fields: [userId], references: [id])
+  uploading   Boolean
+  userId      Int?
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  files    File[]
+}
