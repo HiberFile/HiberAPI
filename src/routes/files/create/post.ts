@@ -9,7 +9,6 @@ interface IQuerystring {}
 interface IParams {}
 interface IBody {
   name: string;
-  expire: number;
   chunksNumber: number;
 }
 interface IHeaders {}
