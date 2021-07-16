@@ -10,7 +10,7 @@ generator client {
 model File {
   id          Int      @id @default(autoincrement())
   hiberfileId String   @unique
-  name        String
+  name        String   @db.VarChar(256)
   expire      DateTime
   user        User?    @relation(fields: [userId], references: [id])
   uploading   Boolean
