@@ -3,7 +3,7 @@ import mariadb from 'mariadb';
 
 require('dotenv').config();
 
-export default async () => {
+(async () => {
   const pool = mariadb.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -24,4 +24,6 @@ export default async () => {
       uploading: false,
     })),
   });
-};
+
+  return;
+})();

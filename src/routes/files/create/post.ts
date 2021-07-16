@@ -21,9 +21,14 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     Body: IBody;
     Headers: IHeaders;
   }>('/', { schema }, async (request, reply) => {
+    const presignedExpire = 12 * 3600;
+
     const hiberfileId = generateId(8);
 
-    const baseParams = { Bucket: 'hiberstorage', Key: hiberfileId };
+    const baseParams = {
+      Bucket: 'hiberstorage',
+      Key: hiberfileId,
+    };
 
     const multipartUpload = await s3
       .createMultipartUpload(baseParams)
@@ -35,8 +40,11 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     await prisma.file.create({
       data: {
         hiberfileId,
-        name: request.body.name,
-        expire: new Date(new Date().getTime() + request.body.expire * 1000),
+        name:
+          request.body.name == 'generated_by_hf--to_be_remplaced.zip'
+            ? `hf_${hiberfileId}.zip`
+            : request.body.name,
+        expire: new Date(new Date().getTime() + presignedExpire * 1000),
         uploading: true,
       },
     });
@@ -47,6 +55,7 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
           ...baseParams,
           UploadId: uploadId,
           PartNumber: i + 1,
+          Expires: presignedExpire,
         })
       )
     );

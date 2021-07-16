@@ -11,6 +11,7 @@ interface IParams {
 interface IBody {
   parts: { ETag: string; PartNumber: number }[];
   uploadId: string;
+  expire: number;
 }
 interface IHeaders {}
 
@@ -29,7 +30,10 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
     await prisma.file.update({
       where: { hiberfileId: request.params.id },
-      data: { uploading: false },
+      data: {
+        uploading: false,
+        expire: new Date(new Date().getTime() + request.body.expire * 1000),
+      },
     });
 
     await s3
