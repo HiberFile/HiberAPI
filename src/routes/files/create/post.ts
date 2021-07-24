@@ -3,7 +3,45 @@ import generateId from '../../../utils/generateId';
 import prisma from '../../../utils/prisma';
 import s3 from '../../../utils/s3';
 
-const schema: FastifySchema = {};
+const schema: FastifySchema = {
+  description: 'Create an upload request.',
+  body: {
+    type: 'object',
+    properties: {
+      chunksNumber: {
+        type: 'number',
+        description:
+          'The number of chunks to upload. The recommended size of a chunk is 10mb.',
+      },
+      name: {
+        type: 'string',
+        description:
+          'The name of your file. If it is a .zip file and you want to replace the name by the HiberFile id, it should be equal to "generated_by_hf--to_be_remplaced.zip".',
+      },
+    },
+  },
+  response: {
+    200: {
+      type: 'object',
+      properties: {
+        uploadUrls: {
+          type: 'array',
+          items: { type: 'string' },
+          description:
+            'The urls to upload all the chunks (the length is equal to the chunksNumber body property).',
+        },
+        uploadId: {
+          type: 'string',
+          description: "The unique id linked to the upload to Amazon's S3.",
+        },
+        hiberfileId: {
+          type: 'string',
+          description: 'The unique id used to download the file on HiberFile.',
+        },
+      },
+    },
+  },
+};
 
 interface IQuerystring {}
 interface IParams {}

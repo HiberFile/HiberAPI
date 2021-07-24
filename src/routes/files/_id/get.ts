@@ -2,7 +2,43 @@ import { FastifyPluginAsync, FastifySchema } from 'fastify';
 import prisma from '../../../utils/prisma';
 import s3 from '../../../utils/s3';
 
-const schema: FastifySchema = {};
+const schema: FastifySchema = {
+  description: 'Download a file.',
+  params: {
+    type: 'object',
+    properties: {
+      id: { type: 'string', description: 'The HiberFile id.' },
+    },
+  },
+  response: {
+    200: {
+      type: 'object',
+      properties: {
+        downloadUrl: {
+          type: 'string',
+          description:
+            'A pre-signed url to download the file directly from the S3. The link expires in 30 minutes.',
+        },
+        filename: { type: 'string', description: 'The name of the file.' },
+        expire: {
+          type: 'string',
+          format: 'date-time',
+          description: 'The expiration date of the file.',
+        },
+      },
+    },
+    404: {
+      type: 'null',
+      description:
+        'The file you are trying to access does not exist. The id is not correct.',
+    },
+    425: {
+      type: 'null',
+      description:
+        'The file you are trying to access is not yet downloaded. You must wait before trying again.',
+    },
+  },
+};
 
 interface IQuerystring {}
 interface IParams {
@@ -36,7 +72,7 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     const downloadUrl = await s3.getSignedUrlPromise('getObject', {
       Bucket: 'hiberstorage',
       Key: file.hiberfileId,
-      Expires: 60 * 60 * 2,
+      Expires: 60 * 30,
       ResponseContentDisposition: `attachment; filename ="${file.name}"`,
     });
 
