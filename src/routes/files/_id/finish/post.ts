@@ -77,7 +77,7 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       where: { hiberfileId: request.params.id },
     });
 
-    if (request.body.expire > 60 * 60 * 24 * 30) return reply.badRequest();
+    // if (request.body.expire > 60 * 60 * 24 * 30) return reply.badRequest();
     if (file === null || file.uploading === false) return reply.notFound();
 
     await prisma.file.update({
