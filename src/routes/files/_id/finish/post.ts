@@ -28,7 +28,7 @@ const schema: FastifySchema = {
       expire: {
         type: 'number',
         description:
-          'The time in seconds after which the link will expire. The maximum is 2592000 seconds (30 days).',
+          'The time in seconds after which the link will expire. There is no maximum.',
       },
     },
   },
