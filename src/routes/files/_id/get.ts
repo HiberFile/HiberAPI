@@ -54,55 +54,59 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     Params: IParams;
     Body: IBody;
     Headers: IHeaders;
-  }>('/', { schema }, async (request, reply) => {
-    const file = await prisma.file.findUnique({
-      where: { hiberfileId: request.params.id },
-      include: {
-        webhooks: { include: { downloaded: true } },
-        user: {
-          include: { webhooks: { include: { newFileDownloaded: true } } },
+  }>(
+    '/',
+    { schema, preValidation: [fastify.authenticate] },
+    async (request, reply) => {
+      const file = await prisma.file.findUnique({
+        where: { hiberfileId: request.params.id },
+        include: {
+          webhooks: { include: { downloaded: true } },
+          user: {
+            include: { webhooks: { include: { newFileDownloaded: true } } },
+          },
         },
-      },
-    });
-
-    if (file === null) return reply.notFound();
-    if (file.uploading) return reply.code(425).send();
-    if (file.private && file.user?.id !== parseInt(request.user as string))
-      return reply.unauthorized();
-
-    try {
-      await s3
-        .headObject({ Bucket: 'hiberstorage', Key: file.hiberfileId })
-        .promise();
-    } catch {
-      return reply.notFound();
-    }
-
-    const downloadUrl = await s3.getSignedUrlPromise('getObject', {
-      Bucket: 'hiberstorage',
-      Key: file.hiberfileId,
-      Expires: 60 * 30,
-      ResponseContentDisposition: `attachment; filename ="${file.name}"`,
-    });
-
-    [
-      ...(file.webhooks?.downloaded ?? []),
-      ...(file.user?.webhooks?.newFileDownloaded ?? []),
-    ].forEach((webhook) => {
-      axios.post(webhook.url, {
-        hiberfileId: request.params.id,
-        name: file.name,
-        expireIn: (file.expire.getTime() - new Date().getTime()) / 1000,
-        downloadUrl,
       });
-    });
 
-    return reply.send({
-      downloadUrl,
-      filename: file.name,
-      expire: file.expire,
-    });
-  });
+      if (file === null) return reply.notFound();
+      if (file.uploading) return reply.code(425).send();
+      if (file.private && file.user?.id !== parseInt(request.user as string))
+        return reply.unauthorized();
+
+      try {
+        await s3
+          .headObject({ Bucket: 'hiberstorage', Key: file.hiberfileId })
+          .promise();
+      } catch {
+        return reply.notFound();
+      }
+
+      const downloadUrl = await s3.getSignedUrlPromise('getObject', {
+        Bucket: 'hiberstorage',
+        Key: file.hiberfileId,
+        Expires: 60 * 30,
+        ResponseContentDisposition: `attachment; filename ="${file.name}"`,
+      });
+
+      [
+        ...(file.webhooks?.downloaded ?? []),
+        ...(file.user?.webhooks?.newFileDownloaded ?? []),
+      ].forEach((webhook) => {
+        axios.post(webhook.url, {
+          hiberfileId: request.params.id,
+          name: file.name,
+          expireIn: (file.expire.getTime() - new Date().getTime()) / 1000,
+          downloadUrl,
+        });
+      });
+
+      return reply.send({
+        downloadUrl,
+        filename: file.name,
+        expire: file.expire,
+      });
+    }
+  );
 };
 
 export default route;
