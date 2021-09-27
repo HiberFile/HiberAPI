@@ -12,11 +12,20 @@ model File {
   hiberfileId String        @unique
   name        String        @db.VarChar(256)
   expire      DateTime
-  user        User?    @relation(fields: [userId], references: [id])
   uploading   Boolean
+  webhooks    FileWebhooks?
   private     Boolean       @default(false)
   user        User?         @relation(fields: [userId], references: [id])
   userId      Int?
+}
+
+model FileWebhooks {
+  id         Int       @id @default(autoincrement())
+  file       File      @relation(fields: [fileId], references: [id])
+  uploading  Webhook[] @relation("newFileUploading")
+  uploaded   Webhook[] @relation("newFileUploaded")
+  downloaded Webhook[] @relation("newFileDownloaded")
+  fileId     Int
 }
 
 model User {
@@ -25,7 +34,35 @@ model User {
   check_email UserEmailChecking?
   password    String
   files       File[]
+  webhooks    UserWebhooks?
 }
+
+model UserWebhooks {
+  id                Int       @id @default(autoincrement())
+  user              User      @relation(fields: [userId], references: [id])
+  newFileUploading  Webhook[] @relation("userNewFileUploading")
+  newFileUploaded   Webhook[] @relation("userNewFileUploaded")
+  newFileDownloaded Webhook[] @relation("userNewFileDownloaded")
+  userId            Int
+}
+
+model Webhook {
+  id                      Int           @id @default(autoincrement())
+  url                     String
+  userNewFileUploading    UserWebhooks? @relation("userNewFileUploading", fields: [userNewFileUploadingId], references: [id])
+  userNewFileUploaded     UserWebhooks? @relation("userNewFileUploaded", fields: [userNewFileUploadedId], references: [id])
+  userNewFileDownloaded   UserWebhooks? @relation("userNewFileDownloaded", fields: [userNewFileDownloadedId], references: [id])
+  newFileUploading        FileWebhooks? @relation("newFileUploading", fields: [newFileUploadingId], references: [id])
+  newFileUploaded         FileWebhooks? @relation("newFileUploaded", fields: [newFileUploadedId], references: [id])
+  newFileDownloaded       FileWebhooks? @relation("newFileDownloaded", fields: [newFileDownloadedId], references: [id])
+  userNewFileUploadingId  Int?
+  userNewFileUploadedId   Int?
+  userNewFileDownloadedId Int?
+  newFileUploadingId      Int?
+  newFileUploadedId       Int?
+  newFileDownloadedId     Int?
+}
+
 model UserEmailChecking {
   id     String  @id @default(cuid())
   user   User    @relation(fields: [userId], references: [id])

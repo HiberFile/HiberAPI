@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { FastifyPluginAsync, FastifySchema } from 'fastify';
 import prisma from '../../../../utils/prisma';
 import s3 from '../../../../utils/s3';
@@ -76,34 +77,60 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     '/',
     { schema, preValidation: [fastify.authenticate] },
     async (request, reply) => {
-    const file = await prisma.file.findUnique({
-      where: { hiberfileId: request.params.id },
-    });
+      const file = await prisma.file.findUnique({
+        where: { hiberfileId: request.params.id },
+        include: {
+          webhooks: { include: { uploaded: true } },
+          user: {
+            include: { webhooks: { include: { newFileUploaded: true } } },
+          },
+        },
+      });
 
-    // if (request.body.expire > 60 * 60 * 24 * 30) return reply.badRequest();
-    if (file === null || file.uploading === false) return reply.notFound();
-    if (file.private && file.user?.id !== parseInt(request.user as string))
-      return reply.unauthorized();
+      // if (request.body.expire > 60 * 60 * 24 * 30) return reply.badRequest();
+      if (file === null || file.uploading === false) return reply.notFound();
+      if (file.private && file.user?.id !== parseInt(request.user as string))
+        return reply.unauthorized();
 
-    await prisma.file.update({
-      where: { hiberfileId: request.params.id },
-      data: {
-        uploading: false,
-        expire: new Date(new Date().getTime() + request.body.expire * 1000),
-      },
-    });
+      await prisma.file.update({
+        where: { hiberfileId: request.params.id },
+        data: {
+          uploading: false,
+          expire: new Date(new Date().getTime() + request.body.expire * 1000),
+        },
+      });
 
-    await s3
-      .completeMultipartUpload({
+      await s3
+        .completeMultipartUpload({
+          Bucket: 'hiberstorage',
+          Key: file.hiberfileId,
+          UploadId: request.body.uploadId,
+          MultipartUpload: { Parts: request.body.parts },
+        })
+        .promise();
+
+      const downloadUrl = await s3.getSignedUrlPromise('getObject', {
         Bucket: 'hiberstorage',
         Key: file.hiberfileId,
-        UploadId: request.body.uploadId,
-        MultipartUpload: { Parts: request.body.parts },
-      })
-      .promise();
+        Expires: 60 * 30,
+        ResponseContentDisposition: `attachment; filename ="${file.name}"`,
+      });
 
-    return reply.send();
-  });
+      [
+        ...(file.webhooks?.uploaded ?? []),
+        ...(file.user?.webhooks?.newFileUploaded ?? []),
+      ].forEach((webhook) => {
+        axios.post(webhook.url, {
+          hiberfileId: request.params.id,
+          name: file.name,
+          expireIn: request.body.expire,
+          downloadUrl,
+        });
+      });
+
+      return reply.send();
+    }
+  );
 };
 
 export default route;
