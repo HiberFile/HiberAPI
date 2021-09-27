@@ -8,18 +8,26 @@ generator client {
 }
 
 model File {
-  id          Int      @id @default(autoincrement())
-  hiberfileId String   @unique
-  name        String   @db.VarChar(256)
+  id          Int           @id @default(autoincrement())
+  hiberfileId String        @unique
+  name        String        @db.VarChar(256)
   expire      DateTime
   user        User?    @relation(fields: [userId], references: [id])
   uploading   Boolean
+  user        User?         @relation(fields: [userId], references: [id])
   userId      Int?
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
-  password String
-  files    File[]
+  id          Int                @id @default(autoincrement())
+  email       String             @unique
+  check_email UserEmailChecking?
+  password    String
+  files       File[]
+}
+model UserEmailChecking {
+  id     String  @id @default(cuid())
+  user   User    @relation(fields: [userId], references: [id])
+  check  Boolean @default(false)
+  userId Int     @unique
 }
