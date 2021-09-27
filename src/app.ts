@@ -13,6 +13,23 @@ const app: FastifyPluginAsync<AppOptions> = async (
   opts
 ): Promise<void> => {
   // Place here your custom code!
+  setInterval(async () => {
+    const expiredFiles = await prisma.file.findMany({
+      where: { expire: { lte: new Date() } },
+    });
+    await prisma.file.deleteMany({
+      where: { expire: { lte: new Date() } },
+    });
+
+    s3.deleteObjects({
+      Bucket: 'hiberstorage',
+      Delete: {
+        Objects: expiredFiles.map((file) => {
+          return { Key: file.id.toString() };
+        }),
+      },
+    });
+  }, 3600 * 1000);
 
   fastify.setSerializerCompiler(() => (data) => JSON.stringify(data));
 
@@ -34,24 +51,6 @@ const app: FastifyPluginAsync<AppOptions> = async (
     routeParams: true,
   });
 };
-
-setInterval(async () => {
-  const expiredFiles = await prisma.file.findMany({
-    where: { expire: { lte: new Date() } },
-  });
-  await prisma.file.deleteMany({
-    where: { expire: { lte: new Date() } },
-  });
-
-  s3.deleteObjects({
-    Bucket: 'hiberstorage',
-    Delete: {
-      Objects: expiredFiles.map((file) => {
-        return { Key: file.id.toString() };
-      }),
-    },
-  });
-}, 3600 * 1000);
 
 export default app;
 export { app };
