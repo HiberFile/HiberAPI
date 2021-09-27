@@ -8,6 +8,12 @@ const schema: FastifySchema = {
   body: {
     type: 'object',
     properties: {
+      private: {
+        type: 'boolean',
+        description:
+          'If the file is private (the request must contain the authorization header).',
+        nullable: true,
+      },
       chunksNumber: {
         type: 'number',
         description:
@@ -48,6 +54,7 @@ interface IParams {}
 interface IBody {
   name: string;
   chunksNumber: number;
+  private: boolean | null;
 }
 interface IHeaders {}
 
@@ -57,7 +64,10 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     Params: IParams;
     Body: IBody;
     Headers: IHeaders;
-  }>('/', { schema }, async (request, reply) => {
+  }>(
+    '/',
+    { schema, preValidation: [fastify.authenticate] },
+    async (request, reply) => {
     const presignedExpire = 12 * 3600;
 
     const hiberfileId = generateId(8);
@@ -74,14 +84,18 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
     if (uploadId === undefined) return reply.internalServerError();
 
+      const fileName =
+        request.body.name == 'generated_by_hf--to_be_remplaced.zip'
+          ? `hf_${hiberfileId}.zip`
+          : request.body.name;
+
     await prisma.file.create({
       data: {
+          userId: request.user ? parseInt(request.user as string) : undefined,
         hiberfileId,
-        name:
-          request.body.name == 'generated_by_hf--to_be_remplaced.zip'
-            ? `hf_${hiberfileId}.zip`
-            : request.body.name,
+          name: fileName,
         expire: new Date(new Date().getTime() + presignedExpire * 1000),
+          private: request.user !== undefined && request.body.private === true,
         uploading: true,
       },
     });

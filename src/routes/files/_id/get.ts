@@ -53,13 +53,18 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     Params: IParams;
     Body: IBody;
     Headers: IHeaders;
-  }>('/', { schema }, async (request, reply) => {
+  }>(
+    '/',
+    { schema, preValidation: [fastify.authenticate] },
+    async (request, reply) => {
     const file = await prisma.file.findUnique({
       where: { hiberfileId: request.params.id },
     });
 
     if (file === null) return reply.notFound();
     if (file.uploading) return reply.code(425).send();
+    if (file.private && file.user?.id !== parseInt(request.user as string))
+      return reply.unauthorized();
 
     try {
       await s3

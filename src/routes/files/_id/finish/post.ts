@@ -72,13 +72,18 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     Params: IParams;
     Body: IBody;
     Headers: IHeaders;
-  }>('/', { schema }, async (request, reply) => {
+  }>(
+    '/',
+    { schema, preValidation: [fastify.authenticate] },
+    async (request, reply) => {
     const file = await prisma.file.findUnique({
       where: { hiberfileId: request.params.id },
     });
 
     // if (request.body.expire > 60 * 60 * 24 * 30) return reply.badRequest();
     if (file === null || file.uploading === false) return reply.notFound();
+    if (file.private && file.user?.id !== parseInt(request.user as string))
+      return reply.unauthorized();
 
     await prisma.file.update({
       where: { hiberfileId: request.params.id },
