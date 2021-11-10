@@ -25,6 +25,10 @@ const schema: FastifySchema = {
           type: 'string',
           description: 'The authentication token.',
         },
+        userId: {
+          type: 'string',
+          description: 'The user id.',
+        },
         // expiresIn: {
         //   type: 'number',
         //   description:
@@ -63,6 +67,7 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
     return reply.send({
       token: fastify.jwt.sign(user.id.toString()),
+      userId: user.id.toString(),
       // expiresIn: new Date().getTime() + 3_600_000,
     });
   });
