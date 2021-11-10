@@ -1,4 +1,3 @@
-import { logo } from './assets/logo';
 import { locale } from './locales/locale';
 
 export const generateEmail = (
@@ -8,11 +7,12 @@ export const generateEmail = (
   const locale: locale = require(`./locales/${language}`).default;
 
   const html = `
-  <html>
+  <html lang=${language}>
     <head>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+      <title>${locale.subject}</title>
 
       <!--[if (gte mso 9)|(IE)]><!-->
       <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,18 +25,16 @@ export const generateEmail = (
         <p style="margin-bottom: 2rem;" >${locale.thanks}</p>
         <p style="margin-bottom: 2rem;" >${
           locale.please_verify
-        } <a href="${verificationLink}" style="color: white;" >${
+        } <a href="${verificationLink}" style="color: white; text-decoration: underline" >${
     locale.button
   }</a>.</p>
         <p style="margin-bottom: 2rem;" >${locale.get_help}</p>
         <div style="margin-bottom: 5rem;" >
           <p style="margin: 0;" >${locale.salutations}</p>
           <p style="margin: 0;" >${locale.hf_team}</p>
-          <p style="margin: 0;" ><a href="https://hiberfile.com/" style="color: white;" >https://hiberfile.com/</a></p>
+          <p style="margin: 0;" ><a href="https://hiberfile.com/" style="color: white; text-decoration: underline" >https://hiberfile.com/</a></p>
         </div>
-        <img src="data:image/svg+xml;base64,${Buffer.from(logo).toString(
-          'base64'
-        )}" alt="hiberfile logo" style="width: 5rem; height: auto;" />
+        <img src="https://hiberfile.com/logo.png" alt="hiberfile logo" style="width: 5rem; height: auto;" />
       </main>
     </body>
   </html>`;
