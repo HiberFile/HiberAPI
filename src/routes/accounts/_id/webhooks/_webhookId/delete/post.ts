@@ -1,16 +1,17 @@
 import { FastifyPluginAsync, FastifySchema } from 'fastify';
-import prisma from '../../../../utils/prisma';
+import prisma from '../../../../../../utils/prisma';
 
 const schema: FastifySchema = {
   description:
-    'Add a user webhook (a webhook triggered for each file uploading, uploaded, or downloaded).',
+    'Remove a user webhook (a webhook triggered for each file uploading, uploaded, or downloaded).',
   params: {
     type: 'object',
     properties: {
       id: { type: 'string', description: 'The HiberFile user id.' },
+      webhookId: { type: 'number', description: 'The webhook id.' },
     },
   },
-  body: {
+  querystring: {
     type: 'object',
     properties: {
       webhookType: {
@@ -31,7 +32,7 @@ const schema: FastifySchema = {
   response: {
     200: {
       type: 'null',
-      description: 'The webhook has been added.',
+      description: 'The webhook has been removed.',
     },
   },
 };
@@ -39,17 +40,15 @@ const schema: FastifySchema = {
 interface IQuerystring {}
 interface IParams {
   id: string;
+  webhookId: string;
 }
-interface IBody {
-  webhookType: 'newFileUploading' | 'newFileUploaded' | 'newFileDownloaded';
-  url: string;
-}
+interface IBody {}
 interface IHeaders {
   authorization: string;
 }
 
 const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
-  fastify.get<{
+  fastify.post<{
     Querystring: IQuerystring;
     Params: IParams;
     Body: IBody;
@@ -68,16 +67,13 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       if (user === null) return reply.notFound('The user was not found.');
 
-      await prisma.userWebhooks.create({
-        data: {
-          userId: parseInt(request.user as string),
-          [request.body.webhookType]: {
-            create: {
-              url: request.body.url,
-            },
-          },
-        },
-      });
+      if (await prisma.webhook.count({
+        where: { id: parseInt(request.params.webhookId) }
+      }) === null) return reply.notFound('The webhook was not found.');
+
+      await prisma.webhook.delete({
+        where: { id: parseInt(request.params.webhookId) }
+      })
 
       return reply.send();
     }
