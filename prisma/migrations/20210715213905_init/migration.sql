@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `File` MODIFY `name` VARCHAR(256) NOT NULL;
