@@ -15,7 +15,7 @@
     "prisma:generate": "npx prisma generate",
     "prisma:deploy": "npx prisma migrate deploy",
     "tsc": "tsc",
-    "build": "prisma:generate && npm run tsc",
+    "build": "npm run prisma:generate && npm run tsc",
     "start": "fastify start -l info dist/app.js"
   },
   "repository": {
