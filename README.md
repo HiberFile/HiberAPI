@@ -30,7 +30,7 @@
 <p align="center">
   <a href="https://hiberfile.com">Website</a>
   ·
-  <a href="#🚀-quick-start">Quick start</a>
+  <a href="#-quick-start">Quick start</a>
 </p>
 
 **The API of [HiberFile](https://github.com/hiberfile/hiberfile).**
@@ -68,12 +68,12 @@
    
    > Note that you can use your favorite editor instead of `nano`, like `vi` or `mcedit`.
    
-5. Check that the endpoint of the S3.
+5. Use your own endpoint of the S3.
 
    ```sh
    nano src/utils/s3.ts
    ```
-   Then, on the 19th line, check the endpoint.
+   Then, on the 19th line, edit the endpoint.
 
 6. Launch the dev server (optional):
 
@@ -81,10 +81,10 @@
    npm run dev
    ```
 
-7. Start the server:
+7. Deploy the server:
 
    ```sh
-   npm run start
+   npm run build && npm run start
    ```
 
 ## 🤝 Contributing
@@ -96,7 +96,7 @@ If you are interested in helping contribute to **HiberFile**, feel free to open 
 <!-- This project exists thanks to all the people who [contribute](https://github.com/hiberfile/hiberapi/graphs/contributors). -->
 
 <a href="https://github.com/hiberfile/hiberapi/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=hiberfile/hiberapi" />
+  <img alt="contributors" src="https://contrib.rocks/image?repo=hiberfile/hiberapi" />
 </a>
 
 ## 📝 License

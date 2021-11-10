@@ -7,13 +7,16 @@
     "test": "test"
   },
   "scripts": {
+    "dev": "nodemon --watch src/ --exec 'npm run build && npm run start' -e ts",
     "test": "tap test/**/*.test.js",
-    "start": "npm run prisma && npm run build:ts && fastify start -l info dist/app.js",
-    "dev": "nodemon --watch '**/*.ts' --exec 'fastify start -l info dist/app.js'",
-    "build:ts": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "prisma": "npx prisma migrate dev --name init"
+    "prisma:dev": "func() { if [ ${#1} = 0 ]; then echo \"Please provide a name for the migration.\nExample: npm run prisma:dev -- 'commit example'\"; else npx prisma migrate dev --name \"$1\"; fi }; func ",
+    "prisma:generate": "npx prisma generate",
+    "prisma:deploy": "npx prisma migrate deploy",
+    "tsc": "tsc",
+    "build": "prisma:generate && npm run tsc",
+    "start": "fastify start -l info dist/app.js"
   },
   "repository": {
     "type": "git",
