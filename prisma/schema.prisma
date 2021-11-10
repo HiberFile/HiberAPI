@@ -37,6 +37,13 @@ model User {
   webhooks    UserWebhooks?
 }
 
+model UserEmailChecking {
+  id     String  @id @default(cuid())
+  user   User    @relation(fields: [userId], references: [id])
+  check  Boolean @default(false)
+  userId Int     @unique
+}
+
 model UserWebhooks {
   id                Int       @id @default(autoincrement())
   user              User      @relation(fields: [userId], references: [id])
@@ -61,11 +68,4 @@ model Webhook {
   newFileUploadingId      Int?
   newFileUploadedId       Int?
   newFileDownloadedId     Int?
-}
-
-model UserEmailChecking {
-  id     String  @id @default(cuid())
-  user   User    @relation(fields: [userId], references: [id])
-  check  Boolean @default(false)
-  userId Int     @unique
 }
