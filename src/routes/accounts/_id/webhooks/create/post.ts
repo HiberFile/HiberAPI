@@ -68,6 +68,9 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
 
       if (user === null) return reply.notFound('The user was not found.');
 
+      if (!request.body.url.startsWith('https://'))
+        return reply.badRequest('The url must start with https://');
+
       if (await prisma.userWebhooks.count({
         where: { userId: user.id }
       }) === 0) {

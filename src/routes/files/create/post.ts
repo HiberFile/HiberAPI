@@ -29,7 +29,7 @@ const schema: FastifySchema = {
         type: 'object',
         nullable: true,
         description:
-          'An object containing the webhooks. All webhooks are called with the POST method.',
+          'An object containing the webhooks. All webhooks are called with the POST method and must start with "https://".',
         properties: {
           uploading: {
             type: 'string',
@@ -133,9 +133,11 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
             ? {
                 webhooks: {
                   create: Object.fromEntries(
-                    Object.entries(request.body.webhooks).map(
-                      (webhookName, url) => {
-                        return [webhookName, { create: { url } }];
+                    Object.entries(request.body.webhooks).filter(([_, url]) => {
+                      return url && url.startsWith('https://');
+                    }).map(
+                      ([webhookType, url]) => {
+                        return [webhookType, { create: { url } }];
                       }
                     )
                   ),
