@@ -66,8 +66,6 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       include: { check_email: true },
     });
 
-    // TODO: add SMTP_HOST, SMTP_PORT, MAIL_USER, MAIL_PW properties to .env
-
     if (process.env.SMTP_HOST && process.env.SMTP_PORT) {
       const transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST,
