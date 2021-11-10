@@ -3,6 +3,7 @@ import { FastifyPluginAsync, FastifySchema } from 'fastify';
 import generateId from '../../../utils/generateId';
 import prisma from '../../../utils/prisma';
 import s3 from '../../../utils/s3';
+import xss from 'xss';
 
 const schema: FastifySchema = {
   description: 'Create an upload request.',
@@ -119,7 +120,7 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       const fileName =
         request.body.name == 'generated_by_hf--to_be_remplaced.zip'
           ? `hf_${hiberfileId}.zip`
-          : request.body.name;
+          : xss(request.body.name);
 
       await prisma.file.create({
         data: {

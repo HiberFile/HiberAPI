@@ -46,7 +46,8 @@
     "file-chunked": "^1.0.4",
     "mariadb": "^2.5.4",
     "nodemailer": "^6.6.5",
-    "pump": "^3.0.0"
+    "pump": "^3.0.0",
+    "xss": "^1.0.10"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
