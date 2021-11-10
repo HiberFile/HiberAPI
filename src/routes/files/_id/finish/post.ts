@@ -125,7 +125,7 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
           name: file.name,
           expireIn: request.body.expire,
           downloadUrl,
-        });
+        }, { maxRedirects: 0 });
       });
 
       return reply.send();

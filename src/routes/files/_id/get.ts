@@ -97,7 +97,7 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
           name: file.name,
           expireIn: (file.expire.getTime() - new Date().getTime()) / 1000,
           downloadUrl,
-        });
+        }, { maxRedirects: 0 });
       });
 
       return reply.send({
