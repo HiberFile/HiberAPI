@@ -89,7 +89,9 @@ interface IBody {
   } | null;
   private: boolean | null;
 }
-interface IHeaders {}
+interface IHeaders {
+  authorization?: string;
+}
 
 const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
   fastify.post<{
