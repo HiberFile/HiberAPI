@@ -61,9 +61,9 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       const file = await prisma.file.findUnique({
         where: { hiberfileId: request.params.id },
         include: {
-          webhooks: { include: { downloaded: true } },
+          webhooks: { include: { downloading: true } },
           user: {
-            include: { webhooks: { include: { newFileDownloaded: true } } },
+            include: { webhooks: { include: { newFileDownloading: true } } },
           },
         },
       });
@@ -89,8 +89,8 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       });
 
       [
-        ...(file.webhooks?.downloaded ?? []),
-        ...(file.user?.webhooks?.newFileDownloaded ?? []),
+        ...(file.webhooks?.downloading ?? []),
+        ...(file.user?.webhooks?.newFileDownloading ?? []),
       ].forEach((webhook) => {
         axios.post(webhook.url, {
           hiberfileId: request.params.id,

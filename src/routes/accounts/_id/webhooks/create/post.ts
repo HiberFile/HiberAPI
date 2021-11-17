@@ -3,7 +3,7 @@ import prisma from '../../../../../utils/prisma';
 
 const schema: FastifySchema = {
   description:
-    'Add a user webhook (a webhook triggered for each file uploading, uploaded, or downloaded).',
+    'Add a user webhook (a webhook triggered for each file uploading, uploaded, or downloading).',
   params: {
     type: 'object',
     properties: {
@@ -15,7 +15,7 @@ const schema: FastifySchema = {
     properties: {
       webhookType: {
         type: 'string',
-        enum: ['newFileUploading', 'newFileUploaded', 'newFileDownloaded'],
+        enum: ['newFileUploading', 'newFileUploaded', 'newFileDownloading'],
       },
       url: {
         description: 'The url of the webhook.',
@@ -41,7 +41,7 @@ interface IParams {
   id: string;
 }
 interface IBody {
-  webhookType: 'newFileUploading' | 'newFileUploaded' | 'newFileDownloaded';
+  webhookType: 'newFileUploading' | 'newFileUploaded' | 'newFileDownloading';
   url: string;
 }
 interface IHeaders {

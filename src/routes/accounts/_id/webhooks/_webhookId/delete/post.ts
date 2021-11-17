@@ -3,7 +3,7 @@ import prisma from '../../../../../../utils/prisma';
 
 const schema: FastifySchema = {
   description:
-    'Remove a user webhook (a webhook triggered for each file uploading, uploaded, or downloaded).',
+    'Remove a user webhook (a webhook triggered for each file uploading, uploaded, or downloading).',
   params: {
     type: 'object',
     properties: {
@@ -16,7 +16,7 @@ const schema: FastifySchema = {
     properties: {
       webhookType: {
         type: 'string',
-        enum: ['newFileUploading', 'newFileUploaded', 'newFileDownloaded'],
+        enum: ['newFileUploading', 'newFileUploaded', 'newFileDownloading'],
       },
       url: {
         description: 'The url of the webhook.',

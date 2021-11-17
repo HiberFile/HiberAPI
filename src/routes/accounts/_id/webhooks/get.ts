@@ -57,14 +57,14 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         select: {
           newFileUploading: { select: { url: true, id: true } },
           newFileUploaded: { select: { url: true, id: true } },
-          newFileDownloaded: { select: { url: true, id: true } },
+          newFileDownloading: { select: { url: true, id: true } },
         },
       })
 
       return reply.send({ webhooks: webhooks ?? {
         newFileUploading: [],
         newFileUploaded: [],
-        newFileDownloaded: [],
+        newFileDownloading: [],
       }});
     }
   );

@@ -24,7 +24,7 @@ model FileWebhooks {
   file       File      @relation(fields: [fileId], references: [id])
   uploading  Webhook[] @relation("newFileUploading")
   uploaded   Webhook[] @relation("newFileUploaded")
-  downloaded Webhook[] @relation("newFileDownloaded")
+  downloading Webhook[] @relation("newFileDownloading")
   fileId     Int
 }
 
@@ -49,7 +49,7 @@ model UserWebhooks {
   user              User      @relation(fields: [userId], references: [id])
   newFileUploading  Webhook[] @relation("userNewFileUploading")
   newFileUploaded   Webhook[] @relation("userNewFileUploaded")
-  newFileDownloaded Webhook[] @relation("userNewFileDownloaded")
+  newFileDownloading Webhook[] @relation("userNewFileDownloading")
   userId            Int
 }
 
@@ -58,14 +58,14 @@ model Webhook {
   url                     String
   userNewFileUploading    UserWebhooks? @relation("userNewFileUploading", fields: [userNewFileUploadingId], references: [id])
   userNewFileUploaded     UserWebhooks? @relation("userNewFileUploaded", fields: [userNewFileUploadedId], references: [id])
-  userNewFileDownloaded   UserWebhooks? @relation("userNewFileDownloaded", fields: [userNewFileDownloadedId], references: [id])
+  userNewFileDownloading   UserWebhooks? @relation("userNewFileDownloading", fields: [userNewFileDownloadingId], references: [id])
   newFileUploading        FileWebhooks? @relation("newFileUploading", fields: [newFileUploadingId], references: [id])
   newFileUploaded         FileWebhooks? @relation("newFileUploaded", fields: [newFileUploadedId], references: [id])
-  newFileDownloaded       FileWebhooks? @relation("newFileDownloaded", fields: [newFileDownloadedId], references: [id])
+  newFileDownloading       FileWebhooks? @relation("newFileDownloading", fields: [newFileDownloadingId], references: [id])
   userNewFileUploadingId  Int?
   userNewFileUploadedId   Int?
-  userNewFileDownloadedId Int?
+  userNewFileDownloadingId Int?
   newFileUploadingId      Int?
   newFileUploadedId       Int?
-  newFileDownloadedId     Int?
+  newFileDownloadingId     Int?
 }
