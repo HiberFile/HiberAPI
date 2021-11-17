@@ -1,8 +1,8 @@
 import { FastifyPluginAsync, FastifySchema } from 'fastify';
 import prisma from '../../../utils/prisma';
 import bcrypt from 'bcrypt';
-import nodemailer from 'nodemailer';
-import { generateEmail } from '../../../utils/generateEmail/generateEmail';
+import sendEmail from '../../../utils/emails/sendEmail';
+import { checkEmail } from '../../../utils/emails/emailTemplates';
 
 require('dotenv').config();
 
@@ -66,29 +66,10 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       include: { check_email: true },
     });
 
-    if (process.env.SMTP_HOST && process.env.SMTP_PORT) {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT),
-        secure: true,
-        auth: {
-          user: process.env.MAIL_USER,
-          pass: process.env.MAIL_PW,
-        },
-      });
-
-      const email = generateEmail(
-        request.body.language ?? 'en',
-        `https://api.hiberfile.com/accounts/${user.id}/confirmation?confirmation_token=${user.check_email?.id}`
-      );
-
-      transporter.sendMail({
-        from: '"HiberFile" <hiberfile@hiberfile.com>',
-        to: user.email,
-        subject: email.subject,
-        html: email.html,
-      });
-    }
+    await sendEmail(
+      user.email,
+      checkEmail(request.body.language ?? 'en', `https://api.hiberfile.com/accounts/${user.id}/confirmation?confirmation_token=${user.check_email?.id}`)
+    );
 
     return reply.send();
   });
