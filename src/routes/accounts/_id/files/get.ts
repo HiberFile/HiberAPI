@@ -80,7 +80,7 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         expire: file.expire,
       }));
 
-      return reply.send(files);
+      return reply.send({ files });
     }
   );
 };
