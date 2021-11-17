@@ -17,8 +17,13 @@ const app: FastifyPluginAsync<AppOptions> = async (
     const expiredFiles = await prisma.file.findMany({
       where: { expire: { lte: new Date() } },
     });
+
+    await prisma.fileWebhooks.deleteMany({
+      where: { file: { id: { in: expiredFiles.map(file => file.id) } } },
+    })
+
     await prisma.file.deleteMany({
-      where: { expire: { lte: new Date() } },
+      where: { id: { in: expiredFiles.map(file => file.id) } },
     });
 
     s3.deleteObjects({
