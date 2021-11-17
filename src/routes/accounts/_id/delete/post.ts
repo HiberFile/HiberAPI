@@ -75,13 +75,14 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         prisma.userWebhooks.deleteMany({
           where: { userId: user.id },
         }),
-        prisma.file.deleteMany({
-          where: { userId: user.id },
-        }),
       ]);
 
       await prisma.user.delete({
         where: { id: user.id },
+      });
+
+      await prisma.file.deleteMany({
+        where: { userId: user.id },
       });
 
       return reply.send();
