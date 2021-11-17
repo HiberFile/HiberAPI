@@ -44,7 +44,7 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
       });
     }
 
-    return reply.redirect('https://hiberfile.com/');
+    return reply.redirect('https://hiberfile.com/?source=verification-email');
   });
 };
 
