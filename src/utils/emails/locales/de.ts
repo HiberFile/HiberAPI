@@ -11,17 +11,15 @@ export const checkEmail: CheckEmail = {
   subject: 'Bitte überprüfen Sie Ihre E-Mail Adresse für HiberFile',
 }
 
-// TODO: translate
-
 export const resetPassword: ResetPassword = {
-  button: 'cliquez ici',
+  button: 'klicken Sie hier',
   get_help:
-    "Pour obtenir de l'aide, n'hésitez pas à nous contacter sur notre compte Twitter.",
-  salutations: 'Meilleures salutations,',
-  hf_team: "L'Équipe HiberFile,",
-  subject: 'Réinitialisez votre mot de passe HiberFile',
-  you_asked_for_reset: 'Vous avez perdu votre mot de passe et nous avez demandé de le réinitialiser.',
-  if_you_not_asked: 'Si vous n\'êtes pas à l\'origine de cette demande, ne cliquez pas!',
-  if_you_asked: 'Si vous êtes à l\'origine de cette demande,',
-  follow_instructions: 'et suivez les instructions.'
+    "Wenn Sie Hilfe benötigen, wenden Sie sich bitte über unser Twitter-Konto an uns.",
+  salutations: 'Beste Grüße,',
+  hf_team: "Das HiberFile-Team",
+  subject: 'Setzen Sie Ihr HiberFile-Passwort zurück',
+  you_asked_for_reset: 'Sie haben Ihr Passwort vergessen und uns gebeten, es zurückzusetzen.',
+  if_you_not_asked: 'Wenn Sie nicht der Urheber dieser Anfrage sind, klicken Sie bitte nicht!',
+  if_you_asked: 'Wenn Sie den Antrag gestellt haben,',
+  follow_instructions: 'und befolgen Sie die Anweisungen.'
 }
