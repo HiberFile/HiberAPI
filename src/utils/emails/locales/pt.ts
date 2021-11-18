@@ -21,5 +21,5 @@ export const resetPassword: ResetPassword = {
   you_asked_for_reset: 'Perdeu a sua senha e pediu-nos que a redefiníssemos.',
   if_you_not_asked: 'Se não iniciou o pedido de redefinição da palavra-passe, não clique!',
   if_you_asked: 'Se for o autor do pedido, reinicie a sua palavra-passe',
-  follow_instructions: 'e depois siga as instruções'
+  follow_instructions: 'e depois siga as instruções.'
 }
