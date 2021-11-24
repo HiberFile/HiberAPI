@@ -1,6 +1,7 @@
 import { join } from 'path';
 import AutoLoad, { AutoloadPluginOptions } from 'fastify-autoload';
 import { FastifyPluginAsync } from 'fastify';
+import cron from 'node-cron';
 import prisma from './utils/prisma';
 import s3 from './utils/s3';
 
@@ -13,7 +14,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   opts
 ): Promise<void> => {
   // Place here your custom code!
-  setInterval(async () => {
+  cron.schedule('0 * * * *', async () => {
     const expiredFiles = await prisma.file.findMany({
       where: { expire: { lte: new Date() } },
     });
@@ -34,7 +35,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
         }),
       },
     });
-  }, 3600 * 1000);
+  });
 
   fastify.setSerializerCompiler(() => (data) => JSON.stringify(data));
 
