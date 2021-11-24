@@ -16,25 +16,37 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // Place here your custom code!
   cron.schedule('0 * * * *', async () => {
     const expiredFiles = await prisma.file.findMany({
-      where: { expire: { lte: new Date() } },
+      where: { expire: { lte: new Date() } }
     });
 
     await prisma.fileWebhooks.deleteMany({
-      where: { file: { id: { in: expiredFiles.map(file => file.id) } } },
-    })
+      where: { file: { id: { in: expiredFiles.map(file => file.id) } } }
+    });
 
     await prisma.file.deleteMany({
-      where: { id: { in: expiredFiles.map(file => file.id) } },
+      where: { id: { in: expiredFiles.map(file => file.id) } }
     });
 
-    s3.deleteObjects({
-      Bucket: 'hiberstorage',
-      Delete: {
-        Objects: expiredFiles.map((file) => {
-          return { Key: file.id.toString() };
-        }),
-      },
-    });
+    for (const expiredFilesChunked of expiredFiles.reduce((resultArray, item, index) => {
+      const chunkIndex = Math.floor(index / 1000);
+
+      if (!resultArray[chunkIndex]) {
+        resultArray[chunkIndex] = [] as (typeof expiredFiles);
+      }
+
+      resultArray[chunkIndex].push(item);
+
+      return resultArray;
+    }, [] as (typeof expiredFiles)[])) {
+      console.log(s3.deleteObjects({
+        Bucket: 'hiberstorage',
+        Delete: {
+          Objects: expiredFilesChunked.map((file) => {
+            return { Key: file.hiberfileId };
+          })
+        }
+      }));
+    }
   });
 
   fastify.setSerializerCompiler(() => (data) => JSON.stringify(data));
@@ -46,7 +58,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // through your application
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'plugins'),
-    options: opts,
+    options: opts
   });
 
   // This loads all plugins defined in routes
@@ -54,7 +66,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'routes'),
     options: opts,
-    routeParams: true,
+    routeParams: true
   });
 };
 
