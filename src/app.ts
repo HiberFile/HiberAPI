@@ -27,6 +27,8 @@ const app: FastifyPluginAsync<AppOptions> = async (
       where: { id: { in: expiredFiles.map(file => file.id) } }
     });
 
+    console.log('The following files should be deleted soon: ', expiredFiles);
+
     for (const expiredFilesChunked of expiredFiles.reduce((resultArray, item, index) => {
       const chunkIndex = Math.floor(index / 1000);
 
@@ -38,14 +40,14 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
       return resultArray;
     }, [] as (typeof expiredFiles)[])) {
-      console.log(s3.deleteObjects({
+      s3.deleteObjects({
         Bucket: 'hiberstorage',
         Delete: {
           Objects: expiredFilesChunked.map((file) => {
             return { Key: file.hiberfileId };
           })
         }
-      }));
+      })
     }
   });
 
