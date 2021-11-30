@@ -4,7 +4,8 @@ export const checkEmail: CheckEmail = {
   thanks: 'Grazie per aver usato HiberFile e per esserti iscritto!',
   please_verify: 'Per favore, confermate la vostra e-mail per',
   button: 'cliccando qui',
-  get_help: 'Per aiuto, non esitare a contattarci sul nostro account Twitter.',
+  get_help: 'Per aiuto, non esitare a contattarci sul nostro',
+  twitter_account: 'account Twitter',
   salutations: 'Cordiali saluti,',
   hf_team: 'La squadra HiberFile,',
   subject: 'Controlla il tuo indirizzo e-mail per HiberFile',
@@ -12,8 +13,8 @@ export const checkEmail: CheckEmail = {
 
 export const resetPassword: ResetPassword = {
   button: 'clicca qui',
-  get_help:
-    "Per aiuto, contattaci sul nostro account Twitter.",
+  get_help: 'Per aiuto, non esitare a contattarci sul nostro',
+  twitter_account: 'account Twitter',
   salutations: 'Cordiali saluti,',
   hf_team: "Il team HiberFile",
   subject: 'Resetta la tua password HiberFile',

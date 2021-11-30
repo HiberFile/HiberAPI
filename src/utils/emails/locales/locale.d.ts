@@ -1,14 +1,15 @@
 export interface Locale {
   hf_team: string;
   subject: string;
+  get_help: string;
+  twitter_account: string;
+  salutations: string;
 }
 
 interface CheckEmailSpecific {
   thanks: string;
   please_verify: string;
   button: string;
-  get_help: string;
-  salutations: string;
 }
 
 interface ResetPasswordSpecific {
@@ -17,8 +18,6 @@ interface ResetPasswordSpecific {
   if_you_asked: string;
   follow_instructions: string;
   button: string;
-  get_help: string;
-  salutations: string;
 }
 
 export type CheckEmail = CheckEmailSpecific & Locale;

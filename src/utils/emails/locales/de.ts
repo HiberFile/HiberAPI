@@ -5,7 +5,8 @@ export const checkEmail: CheckEmail = {
   please_verify: 'Bitte bestätigen Sie Ihre E-Mail, indem Sie',
   button: 'hier klicken',
   get_help:
-    'Wenn Sie Hilfe benötigen, können Sie uns über unseren Twitter-Account kontaktieren.',
+    'Wenn Sie Hilfe benötigen, kontaktieren Sie uns über unseren',
+  twitter_account: 'Twitter-Account',
   salutations: 'Mit freundlichen Grüßen,',
   hf_team: 'Das HiberFile-Team,',
   subject: 'Bitte überprüfen Sie Ihre E-Mail Adresse für HiberFile',
@@ -14,7 +15,8 @@ export const checkEmail: CheckEmail = {
 export const resetPassword: ResetPassword = {
   button: 'klicken Sie hier',
   get_help:
-    "Wenn Sie Hilfe benötigen, wenden Sie sich bitte über unser Twitter-Konto an uns.",
+    'Wenn Sie Hilfe benötigen, kontaktieren Sie uns über unseren',
+  twitter_account: 'Twitter-Account',
   salutations: 'Beste Grüße,',
   hf_team: "Das HiberFile-Team",
   subject: 'Setzen Sie Ihr HiberFile-Passwort zurück',
