@@ -120,12 +120,16 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
         ...(file.webhooks?.uploaded ?? []),
         ...(file.user?.webhooks?.newFileUploaded ?? []),
       ].forEach((webhook) => {
-        axios.post(webhook.url, {
-          hiberfileId: request.params.id,
-          name: file.name,
-          expireIn: request.body.expire,
-          downloadUrl,
-        }, { maxRedirects: 0 });
+        try {
+          axios.post(webhook.url, {
+            hiberfileId: request.params.id,
+            name: file.name,
+            expireIn: request.body.expire,
+            downloadUrl,
+          }, { maxRedirects: 0 });
+        } catch (error) {
+          console.error(error);
+        }
       });
 
       return reply.send();
