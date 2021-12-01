@@ -18,6 +18,9 @@ export default fp<SwaggerOptions>(async (fastify, opts) => {
       schemes: ['http'],
       consumes: ['application/json'],
       produces: ['application/json'],
+      securityDefinitions: {
+        basicAuth: { type: 'basic' },
+      },
     },
     uiConfig: {
       deepLinking: true,

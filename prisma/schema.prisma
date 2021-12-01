@@ -8,18 +8,74 @@ generator client {
 }
 
 model File {
-  id          Int      @id @default(autoincrement())
-  hiberfileId String   @unique
-  name        String   @db.VarChar(256)
+  id          Int           @id @default(autoincrement())
+  hiberfileId String        @unique
+  name        String        @db.VarChar(256)
   expire      DateTime
-  user        User?    @relation(fields: [userId], references: [id])
   uploading   Boolean
+  webhooks    FileWebhooks?
+  private     Boolean       @default(false)
+  user        User?         @relation(fields: [userId], references: [id])
   userId      Int?
 }
 
+model FileWebhooks {
+  id         Int       @id @default(autoincrement())
+  file       File      @relation(fields: [fileId], references: [id])
+  uploading  Webhook[] @relation("newFileUploading")
+  uploaded   Webhook[] @relation("newFileUploaded")
+  downloading Webhook[] @relation("newFileDownloading")
+  fileId     Int
+}
+
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
-  password String
-  files    File[]
+  id          Int                @id @default(autoincrement())
+  email       String             @unique
+  check_email UserEmailChecking?
+  reset_password UserResetPassword?
+  password    String
+  files       File[]
+  webhooks    UserWebhooks?
+}
+
+model UserEmailChecking {
+  id     String  @id @default(cuid())
+  user   User    @relation(fields: [userId], references: [id])
+  check  Boolean @default(false)
+  emitAt DateTime @default(now())
+  userId Int     @unique
+}
+
+model UserResetPassword {
+  id     String  @id @default(cuid())
+  user   User    @relation(fields: [userId], references: [id])
+  inProcessing  Boolean @default(true)
+  emitAt DateTime @default(now())
+  userId Int     @unique
+}
+
+model UserWebhooks {
+  id                Int       @id @default(autoincrement())
+  user              User      @relation(fields: [userId], references: [id])
+  newFileUploading  Webhook[] @relation("userNewFileUploading")
+  newFileUploaded   Webhook[] @relation("userNewFileUploaded")
+  newFileDownloading Webhook[] @relation("userNewFileDownloading")
+  userId            Int
+}
+
+model Webhook {
+  id                      Int           @id @default(autoincrement())
+  url                     String
+  userNewFileUploading    UserWebhooks? @relation("userNewFileUploading", fields: [userNewFileUploadingId], references: [id])
+  userNewFileUploaded     UserWebhooks? @relation("userNewFileUploaded", fields: [userNewFileUploadedId], references: [id])
+  userNewFileDownloading   UserWebhooks? @relation("userNewFileDownloading", fields: [userNewFileDownloadingId], references: [id])
+  newFileUploading        FileWebhooks? @relation("newFileUploading", fields: [newFileUploadingId], references: [id])
+  newFileUploaded         FileWebhooks? @relation("newFileUploaded", fields: [newFileUploadedId], references: [id])
+  newFileDownloading       FileWebhooks? @relation("newFileDownloading", fields: [newFileDownloadingId], references: [id])
+  userNewFileUploadingId  Int?
+  userNewFileUploadedId   Int?
+  userNewFileDownloadingId Int?
+  newFileUploadingId      Int?
+  newFileUploadedId       Int?
+  newFileDownloadingId     Int?
 }

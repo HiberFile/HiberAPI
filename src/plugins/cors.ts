@@ -11,6 +11,6 @@ export default fp<FastifyCorsOptions>(async (fastify, opts) => {
     origin: '*',
     // origin: [/localhost:\d+$/, /\.?hiberfile\.com$/],
     methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type'],
+    allowedHeaders: ['Content-Type', 'authorization'],
   });
 });

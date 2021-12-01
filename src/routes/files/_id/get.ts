@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { FastifyPluginAsync, FastifySchema } from 'fastify';
 import prisma from '../../../utils/prisma';
 import s3 from '../../../utils/s3';
@@ -53,35 +54,59 @@ const route: FastifyPluginAsync = async (fastify, opts): Promise<void> => {
     Params: IParams;
     Body: IBody;
     Headers: IHeaders;
-  }>('/', { schema }, async (request, reply) => {
-    const file = await prisma.file.findUnique({
-      where: { hiberfileId: request.params.id },
-    });
+  }>(
+    '/',
+    { schema, preValidation: [fastify.authenticate] },
+    async (request, reply) => {
+      const file = await prisma.file.findUnique({
+        where: { hiberfileId: request.params.id },
+        include: {
+          webhooks: { include: { downloading: true } },
+          user: {
+            include: { webhooks: { include: { newFileDownloading: true } } },
+          },
+        },
+      });
 
-    if (file === null) return reply.notFound();
-    if (file.uploading) return reply.code(425).send();
+      if (file === null) return reply.notFound();
+      if (file.uploading) return reply.code(425).send();
+      if (file.private && file.user?.id !== parseInt(request.user as string))
+        return reply.unauthorized();
 
-    try {
-      await s3
-        .headObject({ Bucket: 'hiberstorage', Key: file.hiberfileId })
-        .promise();
-    } catch {
-      return reply.notFound();
+      try {
+        await s3
+          .headObject({ Bucket: 'hiberstorage', Key: file.hiberfileId })
+          .promise();
+      } catch {
+        return reply.notFound();
+      }
+
+      const downloadUrl = await s3.getSignedUrlPromise('getObject', {
+        Bucket: 'hiberstorage',
+        Key: file.hiberfileId,
+        Expires: 60 * 30,
+        ResponseContentDisposition: `attachment; filename ="${file.name}"`,
+      });
+
+      [
+        ...(file.webhooks?.downloading ?? []),
+        ...(file.user?.webhooks?.newFileDownloading ?? []),
+      ].forEach((webhook) => {
+        axios.post(webhook.url, {
+          hiberfileId: request.params.id,
+          name: file.name,
+          expireIn: (file.expire.getTime() - new Date().getTime()) / 1000,
+          downloadUrl,
+        }, { maxRedirects: 0 });
+      });
+
+      return reply.send({
+        downloadUrl,
+        filename: file.name,
+        expire: file.expire,
+      });
     }
-
-    const downloadUrl = await s3.getSignedUrlPromise('getObject', {
-      Bucket: 'hiberstorage',
-      Key: file.hiberfileId,
-      Expires: 60 * 30,
-      ResponseContentDisposition: `attachment; filename ="${file.name}"`,
-    });
-
-    return reply.send({
-      downloadUrl,
-      filename: file.name,
-      expire: file.expire,
-    });
-  });
+  );
 };
 
 export default route;

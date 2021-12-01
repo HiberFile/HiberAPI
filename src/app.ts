@@ -1,6 +1,7 @@
 import { join } from 'path';
 import AutoLoad, { AutoloadPluginOptions } from 'fastify-autoload';
 import { FastifyPluginAsync } from 'fastify';
+import cron from 'node-cron';
 import prisma from './utils/prisma';
 import s3 from './utils/s3';
 
@@ -13,6 +14,42 @@ const app: FastifyPluginAsync<AppOptions> = async (
   opts
 ): Promise<void> => {
   // Place here your custom code!
+  cron.schedule('0 * * * *', async () => {
+    const expiredFiles = await prisma.file.findMany({
+      where: { expire: { lte: new Date() } }
+    });
+
+    await prisma.fileWebhooks.deleteMany({
+      where: { file: { id: { in: expiredFiles.map(file => file.id) } } }
+    });
+
+    await prisma.file.deleteMany({
+      where: { id: { in: expiredFiles.map(file => file.id) } }
+    });
+
+    console.log('The following files should be deleted soon: ', expiredFiles);
+
+    for (const expiredFilesChunked of expiredFiles.reduce((resultArray, item, index) => {
+      const chunkIndex = Math.floor(index / 1000);
+
+      if (!resultArray[chunkIndex]) {
+        resultArray[chunkIndex] = [] as (typeof expiredFiles);
+      }
+
+      resultArray[chunkIndex].push(item);
+
+      return resultArray;
+    }, [] as (typeof expiredFiles)[])) {
+      s3.deleteObjects({
+        Bucket: 'hiberstorage',
+        Delete: {
+          Objects: expiredFilesChunked.map((file) => {
+            return { Key: file.hiberfileId };
+          })
+        }
+      })
+    }
+  });
 
   fastify.setSerializerCompiler(() => (data) => JSON.stringify(data));
 
@@ -23,7 +60,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // through your application
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'plugins'),
-    options: opts,
+    options: opts
   });
 
   // This loads all plugins defined in routes
@@ -31,27 +68,9 @@ const app: FastifyPluginAsync<AppOptions> = async (
   void fastify.register(AutoLoad, {
     dir: join(__dirname, 'routes'),
     options: opts,
-    routeParams: true,
+    routeParams: true
   });
 };
-
-setInterval(async () => {
-  const expiredFiles = await prisma.file.findMany({
-    where: { expire: { lte: new Date() } },
-  });
-  await prisma.file.deleteMany({
-    where: { expire: { lte: new Date() } },
-  });
-
-  s3.deleteObjects({
-    Bucket: 'hiberstorage',
-    Delete: {
-      Objects: expiredFiles.map((file) => {
-        return { Key: file.id.toString() };
-      }),
-    },
-  });
-}, 3600 * 1000);
 
 export default app;
 export { app };
