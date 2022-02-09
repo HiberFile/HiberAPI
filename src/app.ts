@@ -40,14 +40,21 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
       return resultArray;
     }, [] as (typeof expiredFiles)[])) {
-      s3.deleteObjects({
-        Bucket: 'hiberstorage',
-        Delete: {
-          Objects: expiredFilesChunked.map((file) => {
-            return { Key: file.hiberfileId };
-          })
-        }
-      })
+      try {
+        const deleteObjectsRes = await s3.deleteObjects({
+          Bucket: 'hiberstorage',
+          Delete: {
+            Objects: expiredFilesChunked.map((file) => {
+              return { Key: file.hiberfileId };
+            })
+          }
+        }).promise();
+
+        console.log(deleteObjectsRes);
+      } catch (err) {
+        console.log('Failed to delete the following files: ', expiredFilesChunked);
+        console.log(err);
+      }
     }
   });
 
