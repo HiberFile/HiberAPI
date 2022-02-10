@@ -27,32 +27,46 @@ const app: FastifyPluginAsync<AppOptions> = async (
       where: { id: { in: expiredFiles.map(file => file.id) } }
     });
 
+    const allFilesInS3 = await s3.listObjectsV2({
+      Bucket: 'hiberstorage',
+    }).promise();
+
+    const allFilesInDB = await prisma.file.findMany();
+
+    let expiredFilesId = expiredFiles.map(file => file.hiberfileId);
+    allFilesInS3.Contents?.forEach(s3File => {
+      if (!allFilesInDB.find(dbFile => dbFile.hiberfileId === s3File.Key) && s3File.Key) {
+        expiredFilesId.push(s3File.Key);
+        return;
+      }
+    });
+
     console.log('The following files should be deleted soon: ', expiredFiles);
 
-    for (const expiredFilesChunked of expiredFiles.reduce((resultArray, item, index) => {
+    for (const expiredFileIdsChunked of expiredFilesId.reduce((resultArray, item, index) => {
       const chunkIndex = Math.floor(index / 1000);
 
       if (!resultArray[chunkIndex]) {
-        resultArray[chunkIndex] = [] as (typeof expiredFiles);
+        resultArray[chunkIndex] = [] as (typeof expiredFilesId);
       }
 
       resultArray[chunkIndex].push(item);
 
       return resultArray;
-    }, [] as (typeof expiredFiles)[])) {
+    }, [] as (typeof expiredFilesId)[])) {
       try {
         const deleteObjectsRes = await s3.deleteObjects({
           Bucket: 'hiberstorage',
           Delete: {
-            Objects: expiredFilesChunked.map((file) => {
-              return { Key: file.hiberfileId };
+            Objects: expiredFileIdsChunked.map((fileId) => {
+              return { Key: fileId };
             })
           }
         }).promise();
 
         console.log(deleteObjectsRes);
       } catch (err) {
-        console.log('Failed to delete the following files: ', expiredFilesChunked);
+        console.log('Failed to delete the following files: ', expiredFileIdsChunked);
         console.log(err);
       }
     }
